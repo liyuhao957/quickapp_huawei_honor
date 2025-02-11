@@ -933,6 +933,8 @@ class MonitorManager:
     def __init__(self):
         self.monitors = {}
         self._init_monitors()
+        self._start_time = datetime.now()  # 记录启动时间
+        self._last_heartbeat = None
         
     def _init_monitors(self):
         self.monitors = {
@@ -943,29 +945,61 @@ class MonitorManager:
         }
         print(f"当前配置的检查间隔: {Config.CHECK_INTERVALS}")
         
-    def reload_config(self):
-        """重新加载配置"""
+    def _send_startup_heartbeat(self):
+        """发送启动通知"""
         try:
-            print("开始重新加载配置...")
-            self.stop_all()
-            
-            print("加载新配置...")
-            Config.load_from_file()
-            
-            print(f"创建新监控器实例，当前配置: {Config.CHECK_INTERVALS}")
-            self.monitors = {}
-            self._init_monitors()
-            
-            self.start_all()
-            return True
+            message = {
+                "msg_type": "post",
+                "content": {
+                    "post": {
+                        "zh_cn": {
+                            "title": "监控服务启动通知",
+                            "content": [
+                                [{"tag": "text", "text": "🚀 监控服务已成功启动\n"}],
+                                [{"tag": "text", "text": f"启动时间：{self._start_time.strftime('%Y-%m-%d %H:%M:%S')}"}]
+                            ]
+                        }
+                    }
+                }
+            }
+            requests.post(Config.HEARTBEAT_WEBHOOK, json=message, timeout=30)
+            print("启动通知发送成功")
         except Exception as e:
-            print(f"重新加载配置失败: {str(e)}")
-            return False
-        
-    def is_running(self):
-        """检查是否有监控器在运行"""
-        return any(monitor.is_running() for monitor in self.monitors.values())
-        
+            print(f"发送启动通知失败: {str(e)}")
+
+    def send_heartbeat(self):
+        """发送心跳通知"""
+        try:
+            now = datetime.now()
+            # 放宽检测时间窗口到 0:00-0:02
+            if now.hour == 0 and now.minute < 2:
+                # 使用启动时间计算运行时长
+                runtime = now - self._start_time
+                days = runtime.days
+                hours, remainder = divmod(runtime.seconds, 3600)
+                minutes, seconds = divmod(remainder, 60)
+                
+                message = {
+                    "msg_type": "post",
+                    "content": {
+                        "post": {
+                            "zh_cn": {
+                                "title": "服务心跳检测",
+                                "content": [
+                                    [{"tag": "text", "text": "💗 监控服务运行正常\n"}],
+                                    [{"tag": "text", "text": f"已运行时间：{days}天{hours}小时{minutes}分钟\n"}],
+                                    [{"tag": "text", "text": f"检测时间：{now.strftime('%Y-%m-%d %H:%M:%S')}"}]
+                                ]
+                            }
+                        }
+                    }
+                }
+                
+                requests.post(Config.HEARTBEAT_WEBHOOK, json=message, timeout=30)
+                self._last_heartbeat = now
+        except Exception as e:
+            print(f"发送心跳通知失败: {str(e)}")
+
     def start_all(self):
         """启动所有监控器"""
         print("正在启动所有监控器...")
@@ -975,6 +1009,9 @@ class MonitorManager:
                 print(f"已启动监控器: {name}")
             except Exception as e:
                 print(f"启动监控器失败 {name}: {str(e)}")
+        
+        # 发送启动通知
+        self._send_startup_heartbeat()
 
     def stop_all(self):
         """停止所有监控器"""
@@ -1052,9 +1089,9 @@ def main():
         # 启动所有监控器
         manager.start_all()
         
-        # 等待键盘中断
         while True:
-            time.sleep(1)
+            time.sleep(60)  # 每分钟检查一次
+            manager.send_heartbeat()  # 检查是否需要发送心跳
             
     except KeyboardInterrupt:
         print("\n收到停止信号，正在停止所有监控器...")

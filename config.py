@@ -26,4 +26,7 @@ class Config:
     }
 
     # 固定的错误通知 webhook
-    ERROR_WEBHOOK = 'https://open.feishu.cn/open-apis/bot/v2/hook/0073ebb8-c91f-42c9-a88a-b4ecae2b82ba' 
+    ERROR_WEBHOOK = 'https://open.feishu.cn/open-apis/bot/v2/hook/0073ebb8-c91f-42c9-a88a-b4ecae2b82ba'
+
+    # 心跳检测配置
+    HEARTBEAT_WEBHOOK = 'https://open.feishu.cn/open-apis/bot/v2/hook/dd7a3644-a1c7-457a-90af-9a72cc7e41bd'  # 替换为实际的 webhook 
