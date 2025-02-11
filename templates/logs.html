@@ -127,18 +127,34 @@
                 </button>
             </div>
             <pre class="text-sm font-mono bg-gray-50 p-6 rounded-lg overflow-auto" style="height: calc(90vh - 120px);">
-                <template x-if="expanded === 'loader'">{%- for line in logs.huawei_loader -%}
-                <div class="{% if 'ERROR' in line %}text-red-500 font-medium{% else %}text-blue-600{% endif %} py-1 px-2 hover:bg-gray-100">{{ line }}</div>
-                {%- endfor -%}</template>
-                <template x-if="expanded === 'version'">{%- for line in logs.huawei_version -%}
-                <div class="{% if 'ERROR' in line %}text-red-500 font-medium{% else %}text-blue-600{% endif %} py-1 px-2 hover:bg-gray-100">{{ line }}</div>
-                {%- endfor -%}</template>
-                <template x-if="expanded === 'debugger'">{%- for line in logs.honor_debugger -%}
-                <div class="{% if 'ERROR' in line %}text-red-500 font-medium{% else %}text-blue-600{% endif %} py-1 px-2 hover:bg-gray-100">{{ line }}</div>
-                {%- endfor -%}</template>
-                <template x-if="expanded === 'engine'">{%- for line in logs.honor_engine -%}
-                <div class="{% if 'ERROR' in line %}text-red-500 font-medium{% else %}text-blue-600{% endif %} py-1 px-2 hover:bg-gray-100">{{ line }}</div>
-                {%- endfor -%}</template>
+                <template x-if="expanded === 'loader'">
+                    <div>
+                        {%- for line in logs.huawei_loader -%}
+                        <div class="{% if 'ERROR' in line %}text-red-500 font-medium{% else %}text-blue-600{% endif %} py-1 px-2 hover:bg-gray-100">{{ line }}</div>
+                        {%- endfor -%}
+                    </div>
+                </template>
+                <template x-if="expanded === 'version'">
+                    <div>
+                        {%- for line in logs.huawei_version -%}
+                        <div class="{% if 'ERROR' in line %}text-red-500 font-medium{% else %}text-blue-600{% endif %} py-1 px-2 hover:bg-gray-100">{{ line }}</div>
+                        {%- endfor -%}
+                    </div>
+                </template>
+                <template x-if="expanded === 'debugger'">
+                    <div>
+                        {%- for line in logs.honor_debugger -%}
+                        <div class="{% if 'ERROR' in line %}text-red-500 font-medium{% else %}text-blue-600{% endif %} py-1 px-2 hover:bg-gray-100">{{ line }}</div>
+                        {%- endfor -%}
+                    </div>
+                </template>
+                <template x-if="expanded === 'engine'">
+                    <div>
+                        {%- for line in logs.honor_engine -%}
+                        <div class="{% if 'ERROR' in line %}text-red-500 font-medium{% else %}text-blue-600{% endif %} py-1 px-2 hover:bg-gray-100">{{ line }}</div>
+                        {%- endfor -%}
+                    </div>
+                </template>
             </pre>
         </div>
     </div>
