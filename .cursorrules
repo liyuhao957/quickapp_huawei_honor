@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "rules": {
+    "ai_assistant": {
+      "language": "中文",
+      "task_template": {
+        "enabled": true,
+        "template_path": "docs/TASK_TEMPLATE.md",
+        "sections": {
+          "basic_info": {
+            "required": true,
+            "fields": ["文件名", "创建时间", "创建者"]
+          },
+          "task_description": {
+            "required": true
+          },
+          "project_overview": {
+            "required": true
+          },
+          "task_analysis": {
+            "required": true,
+            "subsections": ["核心文件", "相关功能", "潜在影响"]
+          },
+          "current_step": {
+            "required": true
+          },
+          "task_progress": {
+            "required": true,
+            "entry_format": {
+              "timestamp": true,
+              "fields": ["执行的操作", "涉及的文件", "修改原因", "遇到的问题", "状态"]
+            }
+          },
+          "final_review": {
+            "required": true,
+            "fields": ["完成情况", "主要修改", "遗留问题", "后续建议"]
+          }
+        }
+      },
+      "code_review": {
+        "enabled": true,
+        "style_guide": {
+          "check_format": true,
+          "check_naming": true,
+          "check_comments": true
+        }
+      }
+    },
+    "project": {
+      "task_management": {
+        "tasks_directory": ".tasks",
+        "task_file_format": "YYYY-MM-DD_序号.md",
+        "require_task_file": true,
+        "task_template": {
+          "execution_steps": [
+            "任务文件创建",
+            "任务分析",
+            "任务迭代",
+            "任务完成",
+            "最终审查"
+          ]
+        }
+      }
+    },
+    "editor": {
+      "format_on_save": true,
+      "tab_size": 2,
+      "insert_final_newline": true,
+      "trim_trailing_whitespace": true
+    }
+  }
+} 

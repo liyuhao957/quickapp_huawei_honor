@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div x-data="{ expanded: null }" x-cloak class="mb-8">
+    <!-- 2x2 网格布局 -->
+    <div class="grid grid-cols-2 gap-6">
+        <!-- 华为加载器 -->
+        <div class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200 p-6 relative">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800">华为加载器</h3>
+                <button @click="expanded = expanded === 'loader' ? null : 'loader'" 
+                        class="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200">
+                    <span x-show="expanded !== 'loader'" class="text-gray-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
+                        </svg>
+                    </span>
+                    <span x-show="expanded === 'loader'" class="text-gray-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+            <pre class="text-sm font-mono h-[300px] overflow-auto bg-gray-50 p-4 rounded-lg">
+                {%- for line in logs.huawei_loader -%}
+                <div class="{% if 'ERROR' in line %}text-red-500 font-medium{% else %}text-blue-600{% endif %} py-1 px-2 hover:bg-gray-100 transition-colors duration-150">{{ line }}</div>
+                {%- endfor -%}
+            </pre>
+        </div>
+
+        <!-- 华为版本说明 -->
+        <div class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200 p-6 relative">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800">华为版本说明</h3>
+                <button @click="expanded = expanded === 'version' ? null : 'version'" 
+                        class="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200">
+                    <span x-show="expanded !== 'version'" class="text-gray-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
+                        </svg>
+                    </span>
+                    <span x-show="expanded === 'version'" class="text-gray-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+            <pre class="text-sm font-mono h-[300px] overflow-auto bg-gray-50 p-4 rounded-lg">
+                {%- for line in logs.huawei_version -%}
+                <div class="{% if 'ERROR' in line %}text-red-500 font-medium{% else %}text-blue-600{% endif %} py-1 px-2 hover:bg-gray-100 transition-colors duration-150">{{ line }}</div>
+                {%- endfor -%}
+            </pre>
+        </div>
+
+        <!-- 荣耀调试器 -->
+        <div class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200 p-6 relative">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800">荣耀调试器</h3>
+                <button @click="expanded = expanded === 'debugger' ? null : 'debugger'" 
+                        class="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200">
+                    <span x-show="expanded !== 'debugger'" class="text-gray-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
+                        </svg>
+                    </span>
+                    <span x-show="expanded === 'debugger'" class="text-gray-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+            <pre class="text-sm font-mono h-[300px] overflow-auto bg-gray-50 p-4 rounded-lg">
+                {%- for line in logs.honor_debugger -%}
+                <div class="{% if 'ERROR' in line %}text-red-500 font-medium{% else %}text-blue-600{% endif %} py-1 px-2 hover:bg-gray-100 transition-colors duration-150">{{ line }}</div>
+                {%- endfor -%}
+            </pre>
+        </div>
+
+        <!-- 荣耀引擎版本 -->
+        <div class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200 p-6 relative">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800">荣耀引擎版本</h3>
+                <button @click="expanded = expanded === 'engine' ? null : 'engine'" 
+                        class="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200">
+                    <span x-show="expanded !== 'engine'" class="text-gray-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
+                        </svg>
+                    </span>
+                    <span x-show="expanded === 'engine'" class="text-gray-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+            <pre class="text-sm font-mono h-[300px] overflow-auto bg-gray-50 p-4 rounded-lg">
+                {%- for line in logs.honor_engine -%}
+                <div class="{% if 'ERROR' in line %}text-red-500 font-medium{% else %}text-blue-600{% endif %} py-1 px-2 hover:bg-gray-100 transition-colors duration-150">{{ line }}</div>
+                {%- endfor -%}
+            </pre>
+        </div>
+    </div>
+
+    <!-- 展开视图 -->
+    <div x-show="expanded" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 bg-black bg-opacity-60 z-50 backdrop-blur-sm">
+        <div class="bg-white m-6 p-6 rounded-xl max-h-[90vh] overflow-hidden shadow-2xl relative">
+            <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800" x-text="expanded === 'loader' ? '华为加载器' : 
+                                                                     expanded === 'version' ? '华为版本说明' :
+                                                                     expanded === 'debugger' ? '荣耀调试器' : 
+                                                                     '荣耀引擎版本'"></h2>
+                <button @click="expanded = null" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <pre class="text-sm font-mono bg-gray-50 p-6 rounded-lg overflow-auto" style="height: calc(90vh - 120px);">
+                <template x-if="expanded === 'loader'">{%- for line in logs.huawei_loader -%}
+                <div class="{% if 'ERROR' in line %}text-red-500 font-medium{% else %}text-blue-600{% endif %} py-1 px-2 hover:bg-gray-100">{{ line }}</div>
+                {%- endfor -%}</template>
+                <template x-if="expanded === 'version'">{%- for line in logs.huawei_version -%}
+                <div class="{% if 'ERROR' in line %}text-red-500 font-medium{% else %}text-blue-600{% endif %} py-1 px-2 hover:bg-gray-100">{{ line }}</div>
+                {%- endfor -%}</template>
+                <template x-if="expanded === 'debugger'">{%- for line in logs.honor_debugger -%}
+                <div class="{% if 'ERROR' in line %}text-red-500 font-medium{% else %}text-blue-600{% endif %} py-1 px-2 hover:bg-gray-100">{{ line }}</div>
+                {%- endfor -%}</template>
+                <template x-if="expanded === 'engine'">{%- for line in logs.honor_engine -%}
+                <div class="{% if 'ERROR' in line %}text-red-500 font-medium{% else %}text-blue-600{% endif %} py-1 px-2 hover:bg-gray-100">{{ line }}</div>
+                {%- endfor -%}</template>
+            </pre>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div x-data="{ activeTab: 'status' }" class="space-y-8">
+    <!-- 监控状态概览 -->
+    <section>
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+            <svg class="w-6 h-6 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            监控状态概览
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {% for type, info in versions.items() %}
+            <div class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-semibold text-gray-800">{{ info.name }}</h3>
+                    <span class="{% if info.status == '正常运行中' %}text-green-500{% else %}text-red-500{% endif %} flex items-center">
+                        <span class="w-2 h-2 rounded-full {% if info.status == '正常运行中' %}bg-green-500{% else %}bg-red-500{% endif %} mr-2"></span>
+                        {{ info.status }}
+                    </span>
+                </div>
+                <div class="text-sm text-gray-600">
+                    版本: <span class="font-medium text-gray-800">{{ info.version }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- 最新版本信息 -->
+    <section>
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+            <svg class="w-6 h-6 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+            最新版本信息
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% for type, info in versions.items() %}
+            <div class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 p-6">
+                <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
+                    <div>
+                        <h3 class="font-semibold text-gray-800">{{ info.name }}</h3>
+                        <p class="text-sm text-gray-500 mt-1">{{ info.version }}</p>
+                    </div>
+                    <span class="text-sm text-gray-500">{{ info.date }}</span>
+                </div>
+                <div class="space-y-3 text-sm">
+                    {% if info.updates %}
+                        {% if 'components' in info.updates %}
+                            {% for component in info.updates.components %}
+                                <div class="flex items-start space-x-2 hover:bg-gray-50 p-2 rounded-lg transition-colors">
+                                    <span class="text-blue-500 mt-1">•</span>
+                                    <div>
+                                        <span class="font-medium text-gray-800">{{ component.name }}:</span>
+                                        <span class="text-gray-600">{{ component.description }}</span>
+                                        {% if component.doc_link %}
+                                            <a href="{{ component.doc_link.url }}" class="text-blue-500 hover:text-blue-600 ml-2 inline-flex items-center" target="_blank">
+                                                {{ component.doc_link.text }}
+                                                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                                </svg>
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% elif 'features' in info.updates %}
+                            {% for feature in info.updates.features %}
+                                <div class="flex items-start space-x-2 hover:bg-gray-50 p-2 rounded-lg transition-colors">
+                                    <span class="text-blue-500 mt-1">•</span>
+                                    <span class="text-gray-600">{{ feature }}</span>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            {% for update in info.updates %}
+                                <div class="flex items-start space-x-2 hover:bg-gray-50 p-2 rounded-lg transition-colors">
+                                    <span class="text-blue-500 mt-1">•</span>
+                                    <span class="text-gray-600">{{ update }}</span>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% else %}
+                        <div class="text-gray-500 italic">暂无更新</div>
+                    {% endif %}
+                </div>
+                <a href="/monitor/{{ type }}" class="mt-4 inline-flex items-center text-blue-500 hover:text-blue-600 transition-colors">
+                    查看详情
+                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %} 
