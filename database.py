@@ -252,7 +252,9 @@ class VersionDatabase:
             if not loader_data['url'].startswith('http'):
                 raise ValueError("下载地址格式错误")
             
-            if not re.match(r'^\d+\.\d+\.\d+\.\d+$', loader_data['version']):
+            # 修改版本号格式验证
+            version = loader_data['version'].replace('V', '')
+            if not re.match(r'^\d+\.\d+\.\d+\.\d+$', version):
                 raise ValueError("版本号格式错误")
             
             conn = self._get_connection()
@@ -278,6 +280,7 @@ class VersionDatabase:
             self.logger.error(f"保存华为加载器信息失败: {str(e)}")
             return False
 
+    # 修改获取最新版本的查询
     def get_latest_versions(self) -> Dict:
         """获取所有监控项的最新版本信息"""
         try:
@@ -285,81 +288,64 @@ class VersionDatabase:
             cursor = conn.cursor()
             latest_versions = {}
             
-            # 获取华为版本最新更新 - 按版本号排序
-            cursor.execute('''
-                SELECT version, release_date, components, interfaces 
-                FROM huawei_versions 
-                ORDER BY CAST(version AS INTEGER) DESC
-                LIMIT 1
-            ''')
-            row = cursor.fetchone()
-            if row:
+            # 华为版本更新
+            cursor.execute('SELECT version, release_date, components, interfaces FROM huawei_versions')
+            rows = cursor.fetchall()
+            if rows:
+                # 修复排序逻辑
+                sorted_rows = sorted(rows, 
+                                   key=lambda x: self._version_to_tuple(x[0]), 
+                                   reverse=True)
                 latest_versions['huawei_version'] = {
                     'name': '华为版本说明',
-                    'version': row[0],
-                    'date': row[1],
-                    'updates': json.loads(row[2])  # 直接使用完整的更新内容
+                    'version': sorted_rows[0][0],
+                    'date': sorted_rows[0][1],
+                    'updates': json.loads(sorted_rows[0][2])
                 }
             
-            # 获取荣耀调试器最新版本 - 按调试器版本号排序
-            cursor.execute('''
-                SELECT engine_version, honor_version, union_version, 
-                       debugger_version, download_url, features 
-                FROM honor_debugger_versions 
-                ORDER BY CAST(
-                    replace(replace(debugger_version, '.', ''), 'V', '') AS INTEGER
-                ) DESC
-                LIMIT 1
-            ''')
-            row = cursor.fetchone()
-            if row:
+            # 荣耀调试器
+            cursor.execute('SELECT engine_version, honor_version, union_version, debugger_version, download_url, features, created_at FROM honor_debugger_versions')
+            rows = cursor.fetchall()
+            if rows:
+                sorted_rows = sorted(rows, key=lambda x: self._version_to_tuple(x[3]), reverse=True)
                 latest_versions['honor_debugger'] = {
                     'name': '荣耀调试器',
-                    'version': row[3],  # debugger_version
-                    'date': datetime.now().strftime('%Y-%m-%d'),
+                    'version': sorted_rows[0][3],
+                    'date': sorted_rows[0][6],
                     'updates': {
-                        'features': json.loads(row[5])
+                        'features': json.loads(sorted_rows[0][5])
                     }
                 }
             
-            # 获取荣耀引擎版本最新版本 - 按版本号排序
-            cursor.execute('''
-                SELECT version, release_date, honor_version, union_version,
-                       download_url, features 
-                FROM honor_engine_versions 
-                ORDER BY CAST(
-                    replace(replace(version, '.', ''), 'V', '') AS INTEGER
-                ) DESC
-                LIMIT 1
-            ''')
-            row = cursor.fetchone()
-            if row:
+            # 荣耀引擎
+            cursor.execute('SELECT version, release_date, honor_version, union_version, download_url, features FROM honor_engine_versions')
+            rows = cursor.fetchall()
+            if rows:
+                sorted_rows = sorted(rows,
+                                   key=lambda x: self._version_to_tuple(x[0]),
+                                   reverse=True)
                 latest_versions['honor_engine'] = {
                     'name': '荣耀引擎版本',
-                    'version': row[0],
-                    'date': row[1],
+                    'version': sorted_rows[0][0],
+                    'date': sorted_rows[0][1],
                     'updates': {
-                        'features': json.loads(row[5])
+                        'features': json.loads(sorted_rows[0][5])
                     }
                 }
             
-            # 获取华为加载器最新版本 - 按版本号排序
-            cursor.execute('''
-                SELECT version, spec, file_name, download_url
-                FROM huawei_loader_versions 
-                ORDER BY CAST(
-                    replace(replace(version, '.', ''), 'V', '') AS INTEGER
-                ) DESC
-                LIMIT 1
-            ''')
-            row = cursor.fetchone()
-            if row:
+            # 华为加载器
+            cursor.execute('SELECT version, spec, file_name, download_url FROM huawei_loader_versions')
+            rows = cursor.fetchall()
+            if rows:
+                sorted_rows = sorted(rows,
+                                   key=lambda x: self._version_to_tuple(x[0]),
+                                   reverse=True)
                 latest_versions['huawei_loader'] = {
                     'name': '华为加载器',
-                    'version': row[0],
+                    'version': sorted_rows[0][0],
                     'date': datetime.now().strftime('%Y-%m-%d'),
                     'updates': {
-                        'features': [f'规范版本: {row[1]}', f'文件: {row[2]}']
+                        'features': [f'规范版本: {sorted_rows[0][1]}', f'文件: {sorted_rows[0][2]}']
                     }
                 }
             
@@ -376,63 +362,59 @@ class VersionDatabase:
             cursor = conn.cursor()
             
             if monitor_type == 'huawei_version':
-                cursor.execute('''
-                    SELECT version, release_date, components, interfaces 
-                    FROM huawei_versions 
-                    ORDER BY CAST(version AS INTEGER) DESC
-                ''')
+                cursor.execute('SELECT version, release_date, components, interfaces FROM huawei_versions')
                 rows = cursor.fetchall()
+                sorted_rows = sorted(rows,
+                                   key=lambda x: self._version_to_tuple(x[0]),
+                                   reverse=True)
                 return [{
                     'version': row[0],
                     'date': row[1],
-                    'updates': json.loads(row[2])  # 直接使用完整的更新内容
-                } for row in rows]
+                    'updates': json.loads(row[2])
+                } for row in sorted_rows]
+            
             elif monitor_type == 'huawei_loader':
-                cursor.execute('''
-                    SELECT version, spec, file_name, download_url, created_at
-                    FROM huawei_loader_versions 
-                    ORDER BY CAST(
-                        replace(replace(version, '.', ''), 'V', '') AS INTEGER
-                    ) DESC
-                ''')
+                cursor.execute('SELECT version, spec, file_name, download_url, created_at FROM huawei_loader_versions')
                 rows = cursor.fetchall()
+                sorted_rows = sorted(rows,
+                                   key=lambda x: self._version_to_tuple(x[0]),
+                                   reverse=True)
                 return [{
                     'version': row[0],
                     'spec': row[1],
                     'text': row[2],
                     'url': row[3],
                     'created_at': row[4]
-                } for row in rows]
+                } for row in sorted_rows]
+            
             elif monitor_type == 'honor_debugger':
-                cursor.execute('''
-                    SELECT debugger_version, created_at, features, download_url
-                    FROM honor_debugger_versions
-                    ORDER BY CAST(
-                        replace(replace(debugger_version, '.', ''), 'V', '') AS INTEGER
-                    ) DESC
-                ''')
+                cursor.execute('SELECT engine_version, honor_version, union_version, debugger_version, download_url, features, created_at FROM honor_debugger_versions')
                 rows = cursor.fetchall()
+                sorted_rows = sorted(rows,
+                                   key=lambda x: self._version_to_tuple(x[3]),
+                                   reverse=True)
                 return [{
-                    '调试器版本号': row[0],
-                    '上线时间': row[1],
-                    '功能': json.loads(row[2]),
-                    '下载地址': row[3]
-                } for row in rows]
+                    '快应用引擎版本号': row[0],
+                    '荣耀引擎版本号': row[1],
+                    '快应用联盟平台版本号': row[2],
+                    '调试器版本号': row[3],
+                    '下载地址': row[4],
+                    '功能': json.loads(row[5]),
+                    '上线时间': row[6]
+                } for row in sorted_rows]
+            
             elif monitor_type == 'honor_engine':
-                cursor.execute('''
-                    SELECT version, release_date, features, download_url
-                    FROM honor_engine_versions
-                    ORDER BY CAST(
-                        replace(replace(version, '.', ''), 'V', '') AS INTEGER
-                    ) DESC
-                ''')
+                cursor.execute('SELECT version, release_date, features, download_url FROM honor_engine_versions')
                 rows = cursor.fetchall()
+                sorted_rows = sorted(rows,
+                                   key=lambda x: self._version_to_tuple(x[0]),
+                                   reverse=True)
                 return [{
                     '版本号': row[0],
                     '上线时间': row[1],
                     '功能': json.loads(row[2]),
                     '下载地址': row[3]
-                } for row in rows]
+                } for row in sorted_rows]
             
             return []
         except Exception as e:
@@ -568,3 +550,16 @@ class VersionDatabase:
         except Exception as e:
             self.logger.error(f"记录检查时间失败: {str(e)}")
             return False 
+
+    def _version_to_tuple(self, version: str) -> tuple:
+        """将版本号转换为可比较的元组
+        Args:
+            version: 版本号字符串
+        Returns:
+            tuple: 版本号元组
+        """
+        try:
+            return tuple(int(i) for i in version.replace('V', '').strip().split('.'))
+        except Exception as e:
+            self.logger.error(f"版本号转换失败: {str(e)}")
+            return (0,)
