@@ -614,20 +614,25 @@ class HonorEngineMonitor(BaseMonitor):
                             break
                         
                         # 获取上线时间 - 支持多种格式
-                        if next_element and next_element.name in ['p', 'div']:
+                        if next_element and next_element.name in ['p', 'div', 'span']:
                             text = next_element.get_text(strip=True)
-                            # 格式1: 直接是日期
-                            if text.startswith('20') and len(text) >= 8:  # 20xx-xx-xx
+                            # 新增: 使用正则表达式匹配日期格式
+                            date_pattern = r'(?:上线时间\s*)?(\d{4}[-/]\d{1,2}[-/]\d{1,2})'
+                            date_match = re.search(date_pattern, text)
+                            
+                            if date_match:
+                                release_date = date_match.group(1)
+                            # 保留原有的日期检查逻辑作为备选
+                            elif text.startswith('20') and len(text) >= 8:
                                 release_date = text
-                            # 格式2: 包含"上线时间"
                             elif '上线时间' in text:
-                                # 查找下一个p或div标签
-                                date_element = next_element.find_next(['p', 'div'])
+                                date_element = next_element.find_next(['p', 'div', 'span'])
                                 if date_element:
                                     date_text = date_element.get_text(strip=True)
-                                    # 清理日期文本
-                                    date_text = date_text.strip()
-                                    if date_text.startswith('20') and len(date_text) >= 8:  # 确保是日期格式
+                                    date_match = re.search(date_pattern, date_text)
+                                    if date_match:
+                                        release_date = date_match.group(1)
+                                    elif date_text.startswith('20') and len(date_text) >= 8:
                                         release_date = date_text
                         
                         # 获取引擎版本
