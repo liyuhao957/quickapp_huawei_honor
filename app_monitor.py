@@ -97,14 +97,28 @@ class BaseMonitor:
         try:
             headers = {'Content-Type': 'application/json'}
             data = {
-                "msg_type": "text",
-                "content": {
-                    "text": f"❌ {self.name}: {error_msg}"
+                "msg_type": "interactive",
+                "card": {
+                    "config": {"wide_screen_mode": True},
+                    "header": {
+                        "template": "red",  # 使用红色表示错误
+                        "title": {"content": f"{self.name} 监控异常", "tag": "plain_text"}
+                    },
+                    "elements": [
+                        {
+                            "tag": "markdown",
+                            "content": (
+                                "❌ **错误详情**\n\n"
+                                f"```\n{error_msg}\n```\n\n"
+                                f"发生时间：`{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}`"
+                            )
+                        }
+                    ]
                 }
             }
             
             response = requests.post(
-                Config.ERROR_WEBHOOK,  # 使用专门的错误通知 webhook
+                Config.ERROR_WEBHOOK,
                 json=data,
                 headers=headers,
                 timeout=self.timeout
@@ -530,7 +544,7 @@ class HonorDebuggerMonitor(BaseMonitor):
             "card": {
                 "config": {"wide_screen_mode": True},
                 "header": {
-                    "template": "blue",
+                    "template": "orange",  # 修改为橙色
                     "title": {"content": "荣耀快应用调试器更新", "tag": "plain_text"}
                 },
                 "elements": [
@@ -708,7 +722,7 @@ class HonorEngineMonitor(BaseMonitor):
             "card": {
                 "config": {"wide_screen_mode": True},
                 "header": {
-                    "template": "blue",
+                    "template": "orange",  # 修改为橙色
                     "title": {"content": "荣耀快应用引擎更新", "tag": "plain_text"}
                 },
                 "elements": [
@@ -970,18 +984,36 @@ class MonitorManager:
     def _send_startup_heartbeat(self):
         """发送启动通知"""
         try:
+            # 创建监控项目名称映射
+            monitor_names = {
+                'huawei_loader': '华为加载器',
+                'huawei_version': '华为版本更新说明',
+                'honor_debugger': '荣耀调试器',
+                'honor_engine': '荣耀引擎'
+            }
+            
+            # 获取中文名称列表
+            chinese_names = [monitor_names[key] for key in self.monitors.keys()]
+            
             message = {
-                "msg_type": "post",
-                "content": {
-                    "post": {
-                        "zh_cn": {
-                            "title": "监控服务启动通知",
-                            "content": [
-                                [{"tag": "text", "text": "🚀 监控服务已成功启动\n"}],
-                                [{"tag": "text", "text": f"启动时间：{self._start_time.strftime('%Y-%m-%d %H:%M:%S')}"}]
-                            ]
+                "msg_type": "interactive",
+                "card": {
+                    "config": {"wide_screen_mode": True},
+                    "header": {
+                        "template": "blue",
+                        "title": {"content": "监控服务启动", "tag": "plain_text"}
+                    },
+                    "elements": [
+                        {
+                            "tag": "markdown",
+                            "content": (
+                                "🚀 **服务已成功启动**\n\n"
+                                f"启动时间：`{self._start_time.strftime('%Y-%m-%d %H:%M:%S')}`\n"
+                                f"监控项目：`{'、'.join(chinese_names)}`\n"
+                                f"检查间隔：`{Config.CHECK_INTERVALS['huawei_version']}秒`"
+                            )
                         }
-                    }
+                    ]
                 }
             }
             requests.post(Config.HEARTBEAT_WEBHOOK, json=message, timeout=30)
@@ -993,32 +1025,42 @@ class MonitorManager:
         """发送心跳通知"""
         try:
             now = datetime.now()
-            # 放宽检测时间窗口到 0:00-0:02
-            if now.hour == 0 and now.minute < 2:
-                # 使用启动时间计算运行时长
-                runtime = now - self._start_time
-                days = runtime.days
-                hours, remainder = divmod(runtime.seconds, 3600)
-                minutes, seconds = divmod(remainder, 60)
+            # 只在 0:00 发送一次心跳
+            if now.hour == 0 and now.minute == 0:
+                # 检查是否已经发送过
+                if self._last_heartbeat and self._last_heartbeat.date() == now.date():
+                    return  # 今天已经发送过，直接返回
                 
-                message = {
-                    "msg_type": "post",
-                    "content": {
-                        "post": {
-                            "zh_cn": {
-                                "title": "服务心跳检测",
-                                "content": [
-                                    [{"tag": "text", "text": "💗 监控服务运行正常\n"}],
-                                    [{"tag": "text", "text": f"已运行时间：{days}天{hours}小时{minutes}分钟\n"}],
-                                    [{"tag": "text", "text": f"检测时间：{now.strftime('%Y-%m-%d %H:%M:%S')}"}]
-                                ]
-                            }
+            # 使用启动时间计算运行时长
+            runtime = now - self._start_time
+            days = runtime.days
+            hours, remainder = divmod(runtime.seconds, 3600)
+            minutes, seconds = divmod(remainder, 60)
+            
+            message = {
+                "msg_type": "interactive",
+                "card": {
+                    "config": {"wide_screen_mode": True},
+                    "header": {
+                        "template": "green",  # 使用绿色表示正常
+                        "title": {"content": "监控服务心跳", "tag": "plain_text"}
+                    },
+                    "elements": [
+                        {
+                            "tag": "markdown",
+                            "content": (
+                                "💗 **服务状态：运行正常**\n\n"
+                                f"运行时长：`{days}天{hours}小时{minutes}分钟`\n"
+                                f"检测时间：`{now.strftime('%Y-%m-%d %H:%M:%S')}`\n"
+                                f"启动时间：`{self._start_time.strftime('%Y-%m-%d %H:%M:%S')}`"
+                            )
                         }
-                    }
+                    ]
                 }
-                
-                requests.post(Config.HEARTBEAT_WEBHOOK, json=message, timeout=30)
-                self._last_heartbeat = now
+            }
+            
+            requests.post(Config.HEARTBEAT_WEBHOOK, json=message, timeout=30)
+            self._last_heartbeat = now
         except Exception as e:
             print(f"发送心跳通知失败: {str(e)}")
 
