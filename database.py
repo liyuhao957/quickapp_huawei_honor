@@ -300,36 +300,39 @@ class VersionDatabase:
             cursor = conn.cursor()
             latest_versions = {}
             
-            # 华为版本更新
+            # 华为版本更新 - 使用 release_date
             cursor.execute('SELECT version, release_date, components, interfaces FROM huawei_versions')
             rows = cursor.fetchall()
             if rows:
-                # 修复排序逻辑
                 sorted_rows = sorted(rows, 
                                    key=lambda x: self._version_to_tuple(x[0]), 
                                    reverse=True)
                 latest_versions['huawei_version'] = {
                     'name': '华为版本说明',
                     'version': sorted_rows[0][0],
-                    'date': sorted_rows[0][1],
+                    'date': sorted_rows[0][1],  # release_date
                     'updates': json.loads(sorted_rows[0][2])
                 }
             
-            # 荣耀调试器
-            cursor.execute('SELECT engine_version, honor_version, union_version, debugger_version, download_url, features, created_at FROM honor_debugger_versions')
+            # 荣耀调试器 - 修改为使用 release_time
+            cursor.execute('''
+                SELECT engine_version, honor_version, union_version, debugger_version, 
+                       download_url, features, release_time 
+                FROM honor_debugger_versions
+            ''')
             rows = cursor.fetchall()
             if rows:
                 sorted_rows = sorted(rows, key=lambda x: self._version_to_tuple(x[3]), reverse=True)
                 latest_versions['honor_debugger'] = {
                     'name': '荣耀调试器',
                     'version': sorted_rows[0][3],
-                    'date': sorted_rows[0][6],
+                    'date': sorted_rows[0][6],  # release_time
                     'updates': {
                         'features': json.loads(sorted_rows[0][5])
                     }
                 }
             
-            # 荣耀引擎
+            # 荣耀引擎 - 使用 release_date
             cursor.execute('SELECT version, release_date, honor_version, union_version, download_url, features FROM honor_engine_versions')
             rows = cursor.fetchall()
             if rows:
@@ -339,14 +342,14 @@ class VersionDatabase:
                 latest_versions['honor_engine'] = {
                     'name': '荣耀引擎版本',
                     'version': sorted_rows[0][0],
-                    'date': sorted_rows[0][1],
+                    'date': sorted_rows[0][1],  # release_date
                     'updates': {
                         'features': json.loads(sorted_rows[0][5])
                     }
                 }
             
-            # 华为加载器
-            cursor.execute('SELECT version, spec, file_name, download_url FROM huawei_loader_versions')
+            # 华为加载器 - 使用 release_time
+            cursor.execute('SELECT version, spec, file_name, download_url, release_time FROM huawei_loader_versions')
             rows = cursor.fetchall()
             if rows:
                 sorted_rows = sorted(rows,
@@ -355,7 +358,7 @@ class VersionDatabase:
                 latest_versions['huawei_loader'] = {
                     'name': '华为加载器',
                     'version': sorted_rows[0][0],
-                    'date': datetime.now().strftime('%Y-%m-%d'),
+                    'date': sorted_rows[0][4],  # release_time
                     'updates': {
                         'features': [f'规范版本: {sorted_rows[0][1]}', f'文件: {sorted_rows[0][2]}']
                     }
