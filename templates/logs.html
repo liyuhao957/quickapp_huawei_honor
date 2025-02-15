@@ -1,161 +1,279 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div x-data="{ expanded: null }" x-cloak class="mb-8">
+<div x-data="{ expanded: null }" x-cloak class="mb-20">
+    <!-- 页面标题 -->
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-lg p-6 mb-8">
+        <h1 class="text-2xl font-bold text-white flex items-center">
+            <span class="bg-white/10 rounded-lg p-2 mr-3">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+            </span>
+            系统运行日志
+        </h1>
+    </div>
+
     <!-- 2x2 网格布局 -->
-    <div class="grid grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- 华为加载器 -->
-        <div class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200 p-6 relative">
-            <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-800">华为加载器</h3>
+        <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200">
+            <div class="bg-gradient-to-r from-gray-50 to-white p-4 flex justify-between items-center border-b border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-blue-100 rounded-lg p-2">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-800">华为加载器</h3>
+                </div>
                 <button @click="expanded = expanded === 'loader' ? null : 'loader'" 
-                        class="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200">
+                        class="p-2 hover:bg-gray-100 rounded-lg transition-all duration-200 group">
                     <span x-show="expanded !== 'loader'" class="text-gray-600">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
                         </svg>
                     </span>
                     <span x-show="expanded === 'loader'" class="text-gray-600">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 transform group-hover:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </span>
                 </button>
             </div>
-            <pre class="text-sm font-mono h-[300px] overflow-auto bg-gray-50 p-4 rounded-lg">
-                {%- for line in logs.huawei_loader -%}
-                <div class="{% if 'ERROR' in line %}text-red-500 font-medium{% else %}text-blue-600{% endif %} py-1 px-2 hover:bg-gray-100 transition-colors duration-150">{{ line }}</div>
-                {%- endfor -%}
-            </pre>
+            <div class="relative">
+                <pre class="text-sm font-mono h-[300px] overflow-auto p-4 bg-gradient-to-b from-gray-50 to-white">
+                    {%- for line in logs.huawei_loader -%}
+                    <div class="group flex">
+                        <div class="{% if 'ERROR' in line %}text-red-500 font-medium bg-red-50{% else %}text-blue-600 hover:bg-blue-50{% endif %} py-1.5 px-3 rounded-lg w-full transition-colors duration-150 flex items-start">
+                            <span class="{% if 'ERROR' in line %}text-red-500{% else %}text-blue-400{% endif %} mr-2 opacity-0 group-hover:opacity-100 transition-opacity">›</span>
+                            <span class="flex-1">{{ line }}</span>
+                        </div>
+                    </div>
+                    {%- endfor -%}
+                </pre>
+                <div class="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+            </div>
         </div>
 
         <!-- 华为版本说明 -->
-        <div class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200 p-6 relative">
-            <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-800">华为版本说明</h3>
+        <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200">
+            <div class="bg-gradient-to-r from-gray-50 to-white p-4 flex justify-between items-center border-b border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-indigo-100 rounded-lg p-2">
+                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-800">华为版本说明</h3>
+                </div>
+                <!-- 展开按钮 -->
                 <button @click="expanded = expanded === 'version' ? null : 'version'" 
-                        class="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200">
+                        class="p-2 hover:bg-gray-100 rounded-lg transition-all duration-200 group">
                     <span x-show="expanded !== 'version'" class="text-gray-600">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
                         </svg>
                     </span>
                     <span x-show="expanded === 'version'" class="text-gray-600">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 transform group-hover:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </span>
                 </button>
             </div>
-            <pre class="text-sm font-mono h-[300px] overflow-auto bg-gray-50 p-4 rounded-lg">
-                {%- for line in logs.huawei_version -%}
-                <div class="{% if 'ERROR' in line %}text-red-500 font-medium{% else %}text-blue-600{% endif %} py-1 px-2 hover:bg-gray-100 transition-colors duration-150">{{ line }}</div>
-                {%- endfor -%}
-            </pre>
+            <div class="relative">
+                <pre class="text-sm font-mono h-[300px] overflow-auto p-4 bg-gradient-to-b from-gray-50 to-white">
+                    {%- for line in logs.huawei_version -%}
+                    <div class="group flex">
+                        <div class="{% if 'ERROR' in line %}text-red-500 font-medium bg-red-50{% else %}text-blue-600 hover:bg-blue-50{% endif %} py-1.5 px-3 rounded-lg w-full transition-colors duration-150 flex items-start">
+                            <span class="{% if 'ERROR' in line %}text-red-500{% else %}text-blue-400{% endif %} mr-2 opacity-0 group-hover:opacity-100 transition-opacity">›</span>
+                            <span class="flex-1">{{ line }}</span>
+                        </div>
+                    </div>
+                    {%- endfor -%}
+                </pre>
+                <div class="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+            </div>
         </div>
 
         <!-- 荣耀调试器 -->
-        <div class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200 p-6 relative">
-            <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-800">荣耀调试器</h3>
+        <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200">
+            <div class="bg-gradient-to-r from-gray-50 to-white p-4 flex justify-between items-center border-b border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-purple-100 rounded-lg p-2">
+                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-800">荣耀调试器</h3>
+                </div>
                 <button @click="expanded = expanded === 'debugger' ? null : 'debugger'" 
-                        class="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200">
+                        class="p-2 hover:bg-gray-100 rounded-lg transition-all duration-200 group">
                     <span x-show="expanded !== 'debugger'" class="text-gray-600">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
                         </svg>
                     </span>
                     <span x-show="expanded === 'debugger'" class="text-gray-600">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 transform group-hover:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </span>
                 </button>
             </div>
-            <pre class="text-sm font-mono h-[300px] overflow-auto bg-gray-50 p-4 rounded-lg">
-                {%- for line in logs.honor_debugger -%}
-                <div class="{% if 'ERROR' in line %}text-red-500 font-medium{% else %}text-blue-600{% endif %} py-1 px-2 hover:bg-gray-100 transition-colors duration-150">{{ line }}</div>
-                {%- endfor -%}
-            </pre>
+            <div class="relative">
+                <pre class="text-sm font-mono h-[300px] overflow-auto p-4 bg-gradient-to-b from-gray-50 to-white">
+                    {%- for line in logs.honor_debugger -%}
+                    <div class="group flex">
+                        <div class="{% if 'ERROR' in line %}text-red-500 font-medium bg-red-50{% else %}text-blue-600 hover:bg-blue-50{% endif %} py-1.5 px-3 rounded-lg w-full transition-colors duration-150 flex items-start">
+                            <span class="{% if 'ERROR' in line %}text-red-500{% else %}text-blue-400{% endif %} mr-2 opacity-0 group-hover:opacity-100 transition-opacity">›</span>
+                            <span class="flex-1">{{ line }}</span>
+                        </div>
+                    </div>
+                    {%- endfor -%}
+                </pre>
+                <div class="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+            </div>
         </div>
 
         <!-- 荣耀引擎版本 -->
-        <div class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200 p-6 relative">
-            <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-800">荣耀引擎版本</h3>
+        <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200">
+            <div class="bg-gradient-to-r from-gray-50 to-white p-4 flex justify-between items-center border-b border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-green-100 rounded-lg p-2">
+                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-800">荣耀引擎版本</h3>
+                </div>
                 <button @click="expanded = expanded === 'engine' ? null : 'engine'" 
-                        class="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200">
+                        class="p-2 hover:bg-gray-100 rounded-lg transition-all duration-200 group">
                     <span x-show="expanded !== 'engine'" class="text-gray-600">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 transform group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
                         </svg>
                     </span>
                     <span x-show="expanded === 'engine'" class="text-gray-600">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 transform group-hover:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </span>
                 </button>
             </div>
-            <pre class="text-sm font-mono h-[300px] overflow-auto bg-gray-50 p-4 rounded-lg">
-                {%- for line in logs.honor_engine -%}
-                <div class="{% if 'ERROR' in line %}text-red-500 font-medium{% else %}text-blue-600{% endif %} py-1 px-2 hover:bg-gray-100 transition-colors duration-150">{{ line }}</div>
-                {%- endfor -%}
-            </pre>
+            <div class="relative">
+                <pre class="text-sm font-mono h-[300px] overflow-auto p-4 bg-gradient-to-b from-gray-50 to-white">
+                    {%- for line in logs.honor_engine -%}
+                    <div class="group flex">
+                        <div class="{% if 'ERROR' in line %}text-red-500 font-medium bg-red-50{% else %}text-blue-600 hover:bg-blue-50{% endif %} py-1.5 px-3 rounded-lg w-full transition-colors duration-150 flex items-start">
+                            <span class="{% if 'ERROR' in line %}text-red-500{% else %}text-blue-400{% endif %} mr-2 opacity-0 group-hover:opacity-100 transition-opacity">›</span>
+                            <span class="flex-1">{{ line }}</span>
+                        </div>
+                    </div>
+                    {%- endfor -%}
+                </pre>
+                <div class="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+            </div>
         </div>
     </div>
 
     <!-- 展开视图 -->
     <div x-show="expanded" 
          x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
+         x-transition:enter-start="opacity-0 transform scale-95"
+         x-transition:enter-end="opacity-100 transform scale-100"
          x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         class="fixed inset-0 bg-black bg-opacity-60 z-50 backdrop-blur-sm">
-        <div class="bg-white m-6 p-6 rounded-xl max-h-[90vh] overflow-hidden shadow-2xl relative">
-            <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
-                <h2 class="text-2xl font-bold text-gray-800" x-text="expanded === 'loader' ? '华为加载器' : 
-                                                                     expanded === 'version' ? '华为版本说明' :
-                                                                     expanded === 'debugger' ? '荣耀调试器' : 
-                                                                     '荣耀引擎版本'"></h2>
-                <button @click="expanded = null" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+         x-transition:leave-start="opacity-100 transform scale-100"
+         x-transition:leave-end="opacity-0 transform scale-95"
+         class="fixed inset-0 bg-black bg-opacity-60 z-50 backdrop-blur-sm flex items-center justify-center">
+        <div class="bg-white m-6 rounded-2xl max-h-[90vh] w-full max-w-5xl overflow-hidden shadow-2xl relative"
+             @click.away="expanded = null">
+            <div class="bg-gradient-to-r from-gray-50 to-white p-6 flex justify-between items-center border-b border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-blue-100 rounded-lg p-2">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                             x-show="expanded === 'loader'">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                             x-show="expanded === 'version'">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                             x-show="expanded === 'debugger'">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                        </svg>
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                             x-show="expanded === 'engine'">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800" x-text="expanded === 'loader' ? '华为加载器' : 
+                                                                         expanded === 'version' ? '华为版本说明' :
+                                                                         expanded === 'debugger' ? '荣耀调试器' : 
+                                                                         '荣耀引擎版本'"></h2>
+                </div>
+                <button @click="expanded = null" 
+                        class="p-2 hover:bg-gray-100 rounded-lg transition-all duration-200 group">
+                    <svg class="w-6 h-6 text-gray-600 transform group-hover:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
             </div>
-            <pre class="text-sm font-mono bg-gray-50 p-6 rounded-lg overflow-auto" style="height: calc(90vh - 120px);">
-                <template x-if="expanded === 'loader'">
-                    <div>
-                        {%- for line in logs.huawei_loader -%}
-                        <div class="{% if 'ERROR' in line %}text-red-500 font-medium{% else %}text-blue-600{% endif %} py-1 px-2 hover:bg-gray-100">{{ line }}</div>
-                        {%- endfor -%}
-                    </div>
-                </template>
-                <template x-if="expanded === 'version'">
-                    <div>
-                        {%- for line in logs.huawei_version -%}
-                        <div class="{% if 'ERROR' in line %}text-red-500 font-medium{% else %}text-blue-600{% endif %} py-1 px-2 hover:bg-gray-100">{{ line }}</div>
-                        {%- endfor -%}
-                    </div>
-                </template>
-                <template x-if="expanded === 'debugger'">
-                    <div>
-                        {%- for line in logs.honor_debugger -%}
-                        <div class="{% if 'ERROR' in line %}text-red-500 font-medium{% else %}text-blue-600{% endif %} py-1 px-2 hover:bg-gray-100">{{ line }}</div>
-                        {%- endfor -%}
-                    </div>
-                </template>
-                <template x-if="expanded === 'engine'">
-                    <div>
-                        {%- for line in logs.honor_engine -%}
-                        <div class="{% if 'ERROR' in line %}text-red-500 font-medium{% else %}text-blue-600{% endif %} py-1 px-2 hover:bg-gray-100">{{ line }}</div>
-                        {%- endfor -%}
-                    </div>
-                </template>
-            </pre>
+            <div class="relative">
+                <pre class="text-sm font-mono bg-gradient-to-b from-gray-50 to-white p-6 overflow-auto" style="height: calc(90vh - 120px);">
+                    <template x-if="expanded === 'loader'">
+                        <div>
+                            {%- for line in logs.huawei_loader -%}
+                            <div class="group flex">
+                                <div class="{% if 'ERROR' in line %}text-red-500 font-medium bg-red-50{% else %}text-blue-600 hover:bg-blue-50{% endif %} py-1.5 px-3 rounded-lg w-full transition-colors duration-150 flex items-start">
+                                    <span class="{% if 'ERROR' in line %}text-red-500{% else %}text-blue-400{% endif %} mr-2 opacity-0 group-hover:opacity-100 transition-opacity">›</span>
+                                    <span class="flex-1">{{ line }}</span>
+                                </div>
+                            </div>
+                            {%- endfor -%}
+                        </div>
+                    </template>
+                    <template x-if="expanded === 'version'">
+                        <div>
+                            {%- for line in logs.huawei_version -%}
+                            <div class="group flex">
+                                <div class="{% if 'ERROR' in line %}text-red-500 font-medium bg-red-50{% else %}text-blue-600 hover:bg-blue-50{% endif %} py-1.5 px-3 rounded-lg w-full transition-colors duration-150 flex items-start">
+                                    <span class="{% if 'ERROR' in line %}text-red-500{% else %}text-blue-400{% endif %} mr-2 opacity-0 group-hover:opacity-100 transition-opacity">›</span>
+                                    <span class="flex-1">{{ line }}</span>
+                                </div>
+                            </div>
+                            {%- endfor -%}
+                        </div>
+                    </template>
+                    <template x-if="expanded === 'debugger'">
+                        <div>
+                            {%- for line in logs.honor_debugger -%}
+                            <div class="group flex">
+                                <div class="{% if 'ERROR' in line %}text-red-500 font-medium bg-red-50{% else %}text-blue-600 hover:bg-blue-50{% endif %} py-1.5 px-3 rounded-lg w-full transition-colors duration-150 flex items-start">
+                                    <span class="{% if 'ERROR' in line %}text-red-500{% else %}text-blue-400{% endif %} mr-2 opacity-0 group-hover:opacity-100 transition-opacity">›</span>
+                                    <span class="flex-1">{{ line }}</span>
+                                </div>
+                            </div>
+                            {%- endfor -%}
+                        </div>
+                    </template>
+                    <template x-if="expanded === 'engine'">
+                        <div>
+                            {%- for line in logs.honor_engine -%}
+                            <div class="group flex">
+                                <div class="{% if 'ERROR' in line %}text-red-500 font-medium bg-red-50{% else %}text-blue-600 hover:bg-blue-50{% endif %} py-1.5 px-3 rounded-lg w-full transition-colors duration-150 flex items-start">
+                                    <span class="{% if 'ERROR' in line %}text-red-500{% else %}text-blue-400{% endif %} mr-2 opacity-0 group-hover:opacity-100 transition-opacity">›</span>
+                                    <span class="flex-1">{{ line }}</span>
+                                </div>
+                            </div>
+                            {%- endfor -%}
+                        </div>
+                    </template>
+                </pre>
+                <div class="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+            </div>
         </div>
     </div>
 </div>
