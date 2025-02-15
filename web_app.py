@@ -148,7 +148,7 @@ def show_logs():
         
         for name, path in log_files.items():
             try:
-                with open(path, 'r') as f:
+                with open(path, 'r', encoding='utf-8') as f:
                     # 读取所有行
                     lines = f.readlines()
                     # 倒序排列
@@ -161,6 +161,14 @@ def show_logs():
         return render_template('logs.html', logs=logs, system_status=system_status)
     except Exception as e:
         return render_template('error.html', error=str(e))
+
+@app.route('/logs/<name>')
+def get_logs(name):
+    try:
+        with open(f'logs/{name}.log', 'r', encoding='utf-8') as f:  # 添加 encoding='utf-8'
+            return f.read()
+    except Exception as e:
+        return str(e)
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001) 

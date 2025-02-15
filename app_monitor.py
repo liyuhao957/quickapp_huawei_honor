@@ -970,7 +970,7 @@ class MonitorManager:
         self.monitors = {}
         self._init_monitors()
         self._start_time = datetime.now()  # 记录启动时间
-        self._last_heartbeat = None
+        self._last_heartbeat = datetime.now()  # 初始化最后心跳时间
         
     def _init_monitors(self):
         self.monitors = {
