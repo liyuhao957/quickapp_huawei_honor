@@ -48,9 +48,17 @@
                         </td>
                         <td class="px-6 py-4">
                             <div class="text-sm text-gray-500">
-                                {{ item.date if monitor_type == 'huawei_version' else 
-                                   item.上线时间 if monitor_type == 'honor_debugger' or monitor_type == 'honor_engine' else 
-                                   item.created_at }}
+                                {% if monitor_type == 'huawei_version' %}
+                                    {{ item.date }}
+                                {% elif monitor_type == 'honor_debugger' or monitor_type == 'huawei_loader' %}
+                                    {% if item.release_time %}
+                                        {{ item.release_time }}
+                                    {% else %}
+                                        未知
+                                    {% endif %}
+                                {% else %}
+                                    {{ item.上线时间 }}
+                                {% endif %}
                             </div>
                         </td>
                         <td class="px-6 py-4">

@@ -11,6 +11,7 @@ import threading
 from config import Config  # 直接使用 config.py 中的 Config
 from database import VersionDatabase
 from logger_config import setup_module_logger
+from utils import parse_time_from_url  # 添加这行
 
 class BaseMonitor:
     """监控基类"""
@@ -231,6 +232,10 @@ class BaseMonitor:
     def is_running(self):
         """检查监控器是否在运行"""
         return not self._stop_flag.is_set()
+
+    def parse_time_from_url(self, url: str) -> Optional[str]:
+        """从URL中提取时间信息"""
+        return parse_time_from_url(url)  # 使用工具函数
 
 class HuaweiVersionMonitor(BaseMonitor):
     """华为快应用版本监控"""
@@ -509,6 +514,8 @@ class HonorDebuggerMonitor(BaseMonitor):
     def _format_notification(self, content, is_startup=False):
         """格式化荣耀调试器更新通知"""
         prefix = "🔔 监控服务已启动" if is_startup else "🚨 检测到调试器更新！"
+        release_time = self.parse_time_from_url(content.get('下载地址', '')) or '未知'
+        
         return {
             "msg_type": "interactive",
             "card": {
@@ -525,12 +532,10 @@ class HonorDebuggerMonitor(BaseMonitor):
                             "|  类型  |  内容  |\n"
                             "|:------:|:------|\n"
                             f"|  调试器版本  | `{content['调试器版本号']}` |\n"
-                            f"|  引擎版本  | `{content['快应用引擎版本号']}` |\n"
-                            f"|  荣耀版本  | `{content['荣耀引擎版本号']}` |\n"
-                            f"|  联盟版本  | `{content['快应用联盟平台版本号']}` |\n\n"
-                            "📋 更新内容\n" +
-                            "\n".join([f"• {item}" for item in content['功能']]) +
-                            f"\n\n📥 [下载地址]({content['下载地址']})"
+                            f"|  引擎版本  | `{content['荣耀引擎版本号']}` |\n"
+                            f"|  联盟版本  | `{content['快应用联盟平台版本号']}` |\n"
+                            f"|  发布时间  | `{release_time}` |\n"
+                            f"|  下载地址  | [点击下载]({content.get('下载地址', '暂无')}) |"
                         )
                     }
                 ]
@@ -905,6 +910,8 @@ class HuaweiLoaderMonitor(BaseMonitor):
     def _format_notification(self, content, is_startup=False):
         """格式化华为加载器更新通知"""
         prefix = "🔔 监控服务已启动" if is_startup else "🚨 检测到加载器更新！"
+        release_time = self.parse_time_from_url(content.get('url', '')) or '未知'
+        
         return {
             "msg_type": "interactive",
             "card": {
@@ -922,6 +929,7 @@ class HuaweiLoaderMonitor(BaseMonitor):
                             "|:------:|:------|\n"
                             f"|  版本号  | `{content['version']}` |\n"
                             f"|  规范版本  | `{content['spec']}` |\n"
+                            f"|  发布时间  | `{release_time}` |\n"
                             f"|  下载地址  | [点击下载]({content.get('url', '暂无')}) |"
                         )
                     }

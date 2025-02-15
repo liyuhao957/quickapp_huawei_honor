@@ -27,7 +27,8 @@ def setup_module_logger(name):
     
     # 设置格式
     formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'  # 统一时间格式
     )
     handler.setFormatter(formatter)
     
