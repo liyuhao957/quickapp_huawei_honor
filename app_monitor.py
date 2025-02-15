@@ -389,6 +389,15 @@ class HuaweiVersionMonitor(BaseMonitor):
         
         # 格式化更新内容
         updates = []
+        # 添加框架更新部分
+        if content['updates'].get('framework'):
+            updates.append("【框架更新】")
+            for item in content['updates']['framework']:
+                update_text = f"• {item['name']}: {item['description']}"
+                if item['doc_link']:
+                    update_text += f"\n  📖 [{item['doc_link']['text']}]({item['doc_link']['url']})"
+                updates.append(update_text)
+        
         if content['updates']['components']:
             updates.append("【组件更新】")
             for item in content['updates']['components']:
