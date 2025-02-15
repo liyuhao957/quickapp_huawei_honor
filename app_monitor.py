@@ -170,10 +170,8 @@ class BaseMonitor:
                             self.send_notification(current_content)
                             self.last_hash = current_hash
                             self.last_content = current_content
-                            self.db.record_check_time()
                         else:
                             self.logger.info(f"{self.name}: 成功获取内容，但未发现更新")
-                            self.db.record_check_time()
                     else:
                         error_msg = f"获取数据失败，等待下次重试"
                         self.logger.error(error_msg)
@@ -230,12 +228,6 @@ class BaseMonitor:
     def run(self):
         """运行监控器"""
         try:
-            # 记录检查时间
-            try:
-                self.db.record_check_time()
-            except Exception as e:
-                print(f"记录检查时间失败: {str(e)}")
-            
             # 获取最新版本
             latest = self.get_latest_version()
             if latest:

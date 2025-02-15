@@ -24,14 +24,6 @@ class VersionDatabase:
             with sqlite3.connect(self.db_file) as conn:
                 cursor = conn.cursor()
                 
-                # 创建 monitor_status 表
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS monitor_status (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        check_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                    )
-                ''')
-                
                 # 华为版本更新表
                 cursor.execute('''
                     CREATE TABLE IF NOT EXISTS huawei_versions (
@@ -544,36 +536,11 @@ class VersionDatabase:
     def get_last_update_time(self):
         """获取最后更新时间"""
         try:
-            conn = self._get_connection()
-            cursor = conn.cursor()
-            
-            # 查询最后检查时间
-            cursor.execute('SELECT MAX(check_time) FROM monitor_status')
-            check_time = cursor.fetchone()[0]
-            
-            if check_time:
-                # 直接返回时间字符串，不需要解析和格式化
-                return check_time
-                
-            return '暂无更新'
+            # 从日志文件获取最后更新时间
+            return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         except Exception as e:
             self.logger.error(f"获取最后更新时间失败: {str(e)}")
             return '获取失败'
-
-    def record_check_time(self):
-        """记录检查时间"""
-        try:
-            conn = self._get_connection()
-            cursor = conn.cursor()
-            
-            # 使用 datetime("now", "localtime") 确保使用本地时间
-            cursor.execute('INSERT INTO monitor_status (check_time) VALUES (datetime("now", "localtime"))')
-            conn.commit()
-            
-            return True
-        except Exception as e:
-            self.logger.error(f"记录检查时间失败: {str(e)}")
-            return False 
 
     def _version_to_tuple(self, version: str) -> tuple:
         """将版本号转换为可比较的元组
