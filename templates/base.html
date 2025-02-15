@@ -4,15 +4,63 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>快应用版本监控系统</title>
-    <script src="https://unpkg.com/alpinejs" defer></script>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* 确保在任何 JS 加载前就应用这些样式 */
+        .moon-icon, .sun-icon {
+            display: none;
+        }
+        
+        :root[data-theme="dark"] .sun-icon {
+            display: block;
+        }
+        
+        :root:not([data-theme="dark"]) .moon-icon {
+            display: block;
+        }
+
         [x-cloak] { display: none !important; }
     </style>
+    <script>
+        // 在任何其他脚本加载前执行
+        (function() {
+            let theme = localStorage.getItem('theme');
+            if (!theme) {
+                theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', theme);
+            document.documentElement.classList.toggle('dark', theme === 'dark');
+        })();
+    </script>
+    <script src="https://unpkg.com/alpinejs" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            bg: '#1a1b1e',
+                            card: '#25262b',
+                            hover: '#2c2d32'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="bg-gray-50">
+<body x-data="{ 
+    toggleTheme() {
+        const current = document.documentElement.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', next);
+    }
+}" class="bg-gray-50 dark:bg-dark-bg transition-colors duration-200">
     <!-- 导航栏 -->
-    <nav class="bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg">
+    <nav class="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-800 dark:to-indigo-900 shadow-lg">
         <div class="max-w-7xl mx-auto px-6">
             <div class="flex justify-between h-16">
                 <div class="flex items-center flex-1">
@@ -65,6 +113,23 @@
                             日志
                         </a>
                     </div>
+                    
+                    <!-- 修改后的主题切换按钮 -->
+                    <button @click="toggleTheme()" 
+                            class="ml-4 p-2 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors">
+                        <!-- 月亮图标 -->
+                        <svg class="w-5 h-5 moon-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+                            </path>
+                        </svg>
+                        <!-- 太阳图标 -->
+                        <svg class="w-5 h-5 sun-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                            </path>
+                        </svg>
+                    </button>
                 </div>
             </div>
         </div>
@@ -76,27 +141,27 @@
     </main>
 
     <!-- 底部状态栏 -->
-    <footer class="fixed bottom-0 w-full bg-gradient-to-r from-gray-50 via-white to-gray-50 border-t border-gray-200 backdrop-blur-sm bg-opacity-95">
+    <footer class="fixed bottom-0 w-full bg-gradient-to-r from-gray-50 via-white to-gray-50 dark:from-dark-card dark:via-dark-card dark:to-dark-card border-t border-gray-200 dark:border-gray-700 backdrop-blur-sm bg-opacity-95">
         <div class="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-8">
                 <div class="flex items-center space-x-2">
                     <span class="{% if system_status.running == '正常运行中' %}text-green-500{% else %}text-red-500{% endif %} flex items-center">
                         <span class="w-2.5 h-2.5 rounded-full {% if system_status.running == '正常运行中' %}bg-green-500 animate-pulse{% else %}bg-red-500{% endif %} mr-2"></span>
-                        <span class="text-sm font-medium text-gray-700">系统运行: {{ system_status.running }}</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">系统运行: {{ system_status.running }}</span>
                     </span>
                 </div>
                 <div class="flex items-center space-x-2">
                     <span class="{% if system_status.db_connected == '已连接' %}text-green-500{% else %}text-red-500{% endif %} flex items-center">
                         <span class="w-2.5 h-2.5 rounded-full {% if system_status.db_connected == '已连接' %}bg-green-500 animate-pulse{% else %}bg-red-500{% endif %} mr-2"></span>
-                        <span class="text-sm font-medium text-gray-700">数据库: {{ system_status.db_connected }}</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">数据库: {{ system_status.db_connected }}</span>
                     </span>
                 </div>
             </div>
             <div class="flex items-center">
-                <svg class="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
-                <span class="text-sm font-medium text-gray-600">最后更新: {{ system_status.last_update }}</span>
+                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">最后更新: {{ system_status.last_update }}</span>
             </div>
         </div>
     </footer>
