@@ -3,29 +3,34 @@
 {% block content %}
 <div x-data="{ activeTab: 'status' }" class="space-y-8">
     <!-- 监控状态概览 -->
-    <section class="bg-white rounded-xl shadow-sm p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
-            <svg class="w-6 h-6 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
+    <section class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-lg p-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-8 flex items-center">
+            <span class="bg-blue-500 p-2 rounded-lg mr-3">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </span>
             监控状态概览
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {% for type, info in versions.items() %}
-            <div class="relative bg-gradient-to-br from-white to-gray-50 rounded-lg border border-gray-200 hover:border-blue-300 transition-all duration-300 p-6 group">
-                <div class="absolute top-0 right-0 mt-4 mr-4">
-                    <span class="{% if info.status == '正常运行中' %}text-green-500{% else %}text-red-500{% endif %} flex items-center text-sm font-medium">
+            <div class="relative overflow-hidden bg-white rounded-xl border-2 {% if info.status == '正常运行中' %}border-green-200{% else %}border-red-200{% endif %} hover:scale-105 transition-all duration-300 p-6 group">
+                <div class="absolute -top-10 -right-10 w-20 h-20 {% if info.status == '正常运行中' %}bg-green-100{% else %}bg-red-100{% endif %} rounded-full opacity-50"></div>
+                <div class="relative">
+                    <span class="{% if info.status == '正常运行中' %}text-green-500{% else %}text-red-500{% endif %} text-sm font-medium flex items-center mb-2">
                         <span class="w-2.5 h-2.5 rounded-full {% if info.status == '正常运行中' %}bg-green-500 animate-pulse{% else %}bg-red-500{% endif %} mr-2"></span>
                         {{ info.status }}
                     </span>
-                </div>
-                <h3 class="font-semibold text-gray-800 mb-3">{{ info.name }}</h3>
-                <div class="text-sm space-y-2">
-                    <div class="text-gray-600">
-                        版本: <span class="font-medium text-gray-800">{{ info.version }}</span>
-                    </div>
-                    <div class="text-gray-600">
-                        更新: <span class="font-medium text-gray-800">{{ info.date }}</span>
+                    <h3 class="font-bold text-gray-800 text-lg mb-3">{{ info.name }}</h3>
+                    <div class="space-y-2">
+                        <div class="flex items-center text-sm">
+                            <span class="text-gray-500 w-16">版本号</span>
+                            <span class="font-semibold text-gray-800 ml-2">{{ info.version }}</span>
+                        </div>
+                        <div class="flex items-center text-sm">
+                            <span class="text-gray-500 w-16">更新时间</span>
+                            <span class="font-semibold text-gray-800 ml-2">{{ info.date }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -34,65 +39,73 @@
     </section>
 
     <!-- 最新版本信息 -->
-    <section class="bg-white rounded-xl shadow-sm p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
-            <svg class="w-6 h-6 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-            </svg>
+    <section class="bg-white rounded-2xl shadow-lg p-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-8 flex items-center">
+            <span class="bg-indigo-500 p-2 rounded-lg mr-3">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+            </span>
             最新版本信息
         </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             {% for type, info in versions.items() %}
-            <div class="bg-gradient-to-br from-white to-gray-50 rounded-lg border border-gray-200 hover:border-blue-300 transition-all duration-300 p-6">
-                <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
-                    <div>
-                        <h3 class="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">{{ info.name }}</h3>
-                        <p class="text-sm text-blue-500 font-medium mt-1">{{ info.version }}</p>
+            <div class="group">
+                <div class="bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-200 hover:border-indigo-300 hover:shadow-xl transition-all duration-300 p-6">
+                    <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                        <div>
+                            <h3 class="font-bold text-gray-800 text-lg group-hover:text-indigo-600 transition-colors">{{ info.name }}</h3>
+                            <p class="text-indigo-500 font-semibold mt-1">{{ info.version }}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs text-gray-500 uppercase tracking-wider">更新时间</span>
+                            <p class="text-sm font-medium text-gray-800 mt-1">{{ info.date }}</p>
+                        </div>
                     </div>
-                    <div class="text-right">
-                        <span class="text-sm text-gray-500">更新时间</span>
-                        <p class="text-sm font-medium text-gray-800 mt-1">{{ info.date }}</p>
-                    </div>
-                </div>
-                <div class="space-y-3 text-sm">
-                    {% if info.updates %}
-                        {% if 'components' in info.updates %}
-                            {% for component in info.updates.components %}
-                                <div class="flex items-start space-x-2 hover:bg-white rounded-lg p-3 transition-colors">
-                                    <span class="text-blue-500 mt-1 flex-shrink-0">•</span>
-                                    <div>
-                                        <span class="font-medium text-gray-800">{{ component.name }}:</span>
-                                        <span class="text-gray-600">{{ component.description }}</span>
-                                        {% if component.doc_link %}
-                                            <a href="{{ component.doc_link.url }}" class="text-blue-500 hover:text-blue-600 ml-2 inline-flex items-center group" target="_blank">
-                                                {{ component.doc_link.text }}
-                                                <svg class="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                                                </svg>
-                                            </a>
-                                        {% endif %}
+                    <div class="space-y-4">
+                        {% if info.updates %}
+                            {% if 'components' in info.updates %}
+                                {% for component in info.updates.components %}
+                                    <div class="bg-gray-50 rounded-lg p-4 hover:bg-white hover:shadow-md transition-all duration-200">
+                                        <div class="flex items-start space-x-3">
+                                            <span class="text-indigo-500 text-lg mt-1">•</span>
+                                            <div>
+                                                <span class="font-semibold text-gray-800">{{ component.name }}</span>
+                                                <p class="text-gray-600 mt-1">{{ component.description }}</p>
+                                                {% if component.doc_link %}
+                                                    <a href="{{ component.doc_link.url }}" class="inline-flex items-center text-indigo-500 hover:text-indigo-600 mt-2 group" target="_blank">
+                                                        {{ component.doc_link.text }}
+                                                        <svg class="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                                        </svg>
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            {% endfor %}
+                                {% endfor %}
+                            {% else %}
+                                {% for feature in info.updates.features %}
+                                    <div class="bg-gray-50 rounded-lg p-4 hover:bg-white hover:shadow-md transition-all duration-200">
+                                        <div class="flex items-start space-x-3">
+                                            <span class="text-indigo-500 text-lg">•</span>
+                                            <span class="text-gray-600">{{ feature }}</span>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
                         {% else %}
-                            {% for feature in info.updates.features %}
-                                <div class="flex items-start space-x-2 hover:bg-white rounded-lg p-3 transition-colors">
-                                    <span class="text-blue-500 mt-1 flex-shrink-0">•</span>
-                                    <span class="text-gray-600">{{ feature }}</span>
-                                </div>
-                            {% endfor %}
+                            <div class="text-gray-500 italic bg-gray-50 rounded-lg p-4">暂无更新</div>
                         {% endif %}
-                    {% else %}
-                        <div class="text-gray-500 italic p-3">暂无更新</div>
-                    {% endif %}
-                </div>
-                <div class="mt-4 text-right">
-                    <a href="/monitor/{{ type }}" class="inline-flex items-center text-blue-500 hover:text-blue-600 transition-colors group">
-                        查看详情
-                        <svg class="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                    </a>
+                    </div>
+                    <div class="mt-6 text-right">
+                        <a href="/monitor/{{ type }}" class="inline-flex items-center px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors group">
+                            查看详情
+                            <svg class="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </a>
+                    </div>
                 </div>
             </div>
             {% endfor %}
