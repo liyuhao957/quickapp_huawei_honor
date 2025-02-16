@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="space-y-8 mb-20">
-    <!-- 页面标题 -->
+    <!-- 页面标题 - 使用与系统运行日志相同的样式 -->
     <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-lg p-6 mb-8">
         <h1 class="text-2xl font-bold text-white flex items-center">
             <span class="bg-white/10 rounded-lg p-2 mr-3">
@@ -16,55 +16,103 @@
 
     <!-- 设置表单 -->
     <form method="POST" action="/settings" class="space-y-8">
-        <!-- 检查间隔设置 -->
-        <div class="bg-white dark:bg-dark-card rounded-xl shadow-lg p-6">
-            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-6">检查间隔设置</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {% for monitor, interval in intervals.items() %}
-                <div class="space-y-2">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {{ {
-                            'huawei_version': '华为版本说明',
-                            'honor_debugger': '荣耀调试器',
-                            'honor_engine': '荣耀引擎',
-                            'huawei_loader': '华为加载器'
-                        }[monitor] }}
-                    </label>
-                    <div class="flex items-center space-x-2">
-                        <input type="number" 
-                               name="check_interval_{{ monitor }}"
-                               value="{{ interval }}"
-                               min="10"
-                               max="3600"
-                               class="flex-1 min-w-0 block w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:text-gray-200">
-                        <span class="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 sm:text-sm">
-                            秒
-                        </span>
+        <!-- 检查间隔设置卡片 -->
+        <div class="bg-white dark:bg-dark-card rounded-xl shadow-lg p-8">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-8 flex items-center">
+                <span class="bg-blue-100 dark:bg-blue-900 rounded-lg p-2 mr-3">
+                    <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </span>
+                检查间隔设置
+            </h2>
+
+            <!-- 华为系列 -->
+            <div class="mb-8">
+                <h3 class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-4 flex items-center">
+                    <span class="bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 p-1.5 rounded-lg mr-2">
+                        华为系列
+                    </span>
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% for monitor, interval in intervals.items() if 'huawei' in monitor %}
+                    <div class="space-y-3 bg-gray-50 dark:bg-gray-800 p-6 rounded-xl hover:shadow-md transition-all">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {{ {
+                                'huawei_version': '华为版本说明',
+                                'huawei_loader': '华为加载器'
+                            }[monitor] }}
+                        </label>
+                        <div class="flex items-center space-x-2">
+                            <input type="number" 
+                                   name="check_interval_{{ monitor }}"
+                                   value="{{ interval }}"
+                                   min="10"
+                                   max="3600"
+                                   class="flex-1 min-w-0 block w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-2 focus:ring-red-500 focus:border-red-500 sm:text-sm dark:text-gray-200 transition-all">
+                            <span class="inline-flex items-center px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-sm font-medium">
+                                秒
+                            </span>
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">建议值: 10-3600秒</p>
                     </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
+            </div>
+
+            <!-- 荣耀系列 -->
+            <div>
+                <h3 class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-4 flex items-center">
+                    <span class="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-1.5 rounded-lg mr-2">
+                        荣耀系列
+                    </span>
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% for monitor, interval in intervals.items() if 'honor' in monitor %}
+                    <div class="space-y-3 bg-gray-50 dark:bg-gray-800 p-6 rounded-xl hover:shadow-md transition-all">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {{ {
+                                'honor_debugger': '荣耀调试器',
+                                'honor_engine': '荣耀引擎'
+                            }[monitor] }}
+                        </label>
+                        <div class="flex items-center space-x-2">
+                            <input type="number" 
+                                   name="check_interval_{{ monitor }}"
+                                   value="{{ interval }}"
+                                   min="10"
+                                   max="3600"
+                                   class="flex-1 min-w-0 block w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:text-gray-200 transition-all">
+                            <span class="inline-flex items-center px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-sm font-medium">
+                                秒
+                            </span>
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">建议值: 10-3600秒</p>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
 
         <!-- 保存按钮 -->
         <div class="flex justify-end">
             <button type="submit" 
-                    class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                    class="inline-flex items-center px-8 py-4 border border-transparent text-base font-medium rounded-xl shadow-lg text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all transform hover:scale-105">
                 保存设置
-                <svg class="ml-2 -mr-1 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="ml-3 -mr-1 w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                 </svg>
             </button>
         </div>
     </form>
 
-    <!-- 消息提示 -->
+    <!-- 消息提示 - 改进动画和样式 -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
-                <div class="fixed bottom-20 right-4 p-4 rounded-lg shadow-lg {{ 'bg-green-100 text-green-700' if category == 'success' else 'bg-red-100 text-red-700' }}">
+                <div class="fixed bottom-20 right-4 p-4 rounded-xl shadow-xl {{ 'bg-green-100 text-green-700' if category == 'success' else 'bg-red-100 text-red-700' }} transform transition-all duration-500 ease-out animate-slideIn">
                     <div class="flex items-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 mr-2 {{ 'animate-bounce' if category == 'success' else 'animate-spin' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             {% if category == 'success' %}
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             {% else %}
@@ -78,4 +126,20 @@
         {% endif %}
     {% endwith %}
 </div>
+
+<style>
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+.animate-slideIn {
+    animation: slideIn 0.5s ease-out;
+}
+</style>
 {% endblock %} 
