@@ -805,6 +805,68 @@ class HonorEngineMonitor(BaseMonitor):
             print(f"获取内容失败: {str(e)}")
             return None
 
+    def monitor(self) -> None:
+        """监控主循环"""
+        self.logger.info(f"开始监控: {self.name}, 检查间隔: {self.check_interval}秒")
+        
+        try:
+            # 获取初始内容
+            retry_count = 0
+            while retry_count < 3 and not self._stop_flag.is_set():
+                self.logger.info(f"正在获取初始内容: {self.name}")
+                current_content = self.get_latest_version()
+                if current_content:
+                    # 保存到数据库
+                    self.logger.info(f"获取初始内容成功: {self.name}")
+                    self.save_to_database(current_content)
+                    self.last_content = current_content
+                    self.last_hash = self.calculate_hash(current_content)
+                    self.send_notification(current_content, is_startup=True)
+                    break
+                retry_count += 1
+                error_msg = f"获取数据失败，重试第{retry_count}次"
+                self.logger.warning(error_msg)
+                time.sleep(5)
+            
+            if retry_count == 3:
+                error_msg = "获取数据失败，监控启动失败"
+                self.logger.error(error_msg)
+                return
+            
+            while not self._stop_flag.wait(self.check_interval):
+                self.logger.info(f"当前检查间隔: {self.check_interval}秒")
+                try:
+                    current_content = self.get_latest_version()
+                    if current_content:
+                        # 判断版本号和下载链接
+                        if self.last_content:
+                            if current_content['版本号'] == self.last_content['版本号']:
+                                if current_content['下载地址'] == self.last_content['下载地址']:
+                                    self.logger.info(f"{self.name}: 成功获取内容，但未发现更新")
+                                    continue
+                                else:
+                                    self.logger.info(f"检测到下载链接变化 - 版本: {current_content['版本号']}")
+                            else:
+                                self.logger.info(f"检测到新版本: {current_content['版本号']}")
+                        
+                        # 保存到数据库并发送通知
+                        self.save_to_database(current_content)
+                        self.send_notification(current_content)
+                        self.last_content = current_content
+                        self.last_hash = self.calculate_hash(current_content)
+                    else:
+                        error_msg = f"获取数据失败，等待下次重试"
+                        self.logger.error(error_msg)
+                except Exception as e:
+                    error_msg = f"监控出错: {str(e)}"
+                    self.logger.error(error_msg)
+                    time.sleep(60)
+        
+        except KeyboardInterrupt:
+            self.logger.info("收到停止信号")
+        finally:
+            self.logger.info(f"监控器 {self.name} 已停止")
+
 class HuaweiLoaderMonitor(BaseMonitor):
     """华为加载器监控"""
     def __init__(self):
