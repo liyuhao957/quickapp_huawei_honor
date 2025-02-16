@@ -29,7 +29,8 @@ class BaseMonitor:
     @property
     def check_interval(self):
         """动态获取检查间隔"""
-        interval = Config.CHECK_INTERVALS[self.name]
+        interval = Config.get_interval(self.name)  # 使用 get_interval 方法
+        self.logger.debug(f"获取检查间隔: {self.name} = {interval}秒")
         return interval
 
     def calculate_hash(self, content: Any) -> str:
@@ -149,17 +150,31 @@ class BaseMonitor:
                 retry_count += 1
                 error_msg = f"获取数据失败，重试第{retry_count}次"
                 self.logger.warning(error_msg)
-                self.send_error_notification(error_msg)
                 time.sleep(5)
             
             if retry_count == 3:
                 error_msg = "获取数据失败，监控启动失败"
                 self.logger.error(error_msg)
-                self.send_error_notification(error_msg)
                 return
             
-            while not self._stop_flag.wait(self.check_interval):
-                self.logger.info(f"当前检查间隔: {self.check_interval}秒")
+            # 修改监控循环，使用累加器而不是 range
+            while True:
+                elapsed = 0  # 累计等待时间
+                current_interval = self.check_interval  # 获取当前间隔
+                self.logger.info(f"当前检查间隔: {current_interval}秒")
+                
+                # 每秒检查一次，直到达到间隔时间
+                while elapsed < current_interval:
+                    if self._stop_flag.wait(1):  # 等待1秒
+                        return
+                    elapsed += 1
+                    # 检查间隔是否有变化
+                    new_interval = self.check_interval
+                    if new_interval != current_interval:
+                        self.logger.info(f"检查间隔已更新: {current_interval}秒 -> {new_interval}秒")
+                        break  # 立即开始新的检查周期
+                
+                # 执行监控逻辑
                 try:
                     current_content = self.get_latest_version()
                     if current_content:
@@ -833,39 +848,51 @@ class HonorEngineMonitor(BaseMonitor):
                 self.logger.error(error_msg)
                 return
             
-            while not self._stop_flag.wait(self.check_interval):
-                self.logger.info(f"当前检查间隔: {self.check_interval}秒")
+            # 修改监控循环，使用累加器而不是 range
+            while True:
+                elapsed = 0  # 累计等待时间
+                current_interval = self.check_interval  # 获取当前间隔
+                self.logger.info(f"当前检查间隔: {current_interval}秒")
+                
+                # 每秒检查一次，直到达到间隔时间
+                while elapsed < current_interval:
+                    if self._stop_flag.wait(1):  # 等待1秒
+                        return
+                    elapsed += 1
+                    # 检查间隔是否有变化
+                    new_interval = self.check_interval
+                    if new_interval != current_interval:
+                        self.logger.info(f"检查间隔已更新: {current_interval}秒 -> {new_interval}秒")
+                        break  # 立即开始新的检查周期
+                
+                # 执行监控逻辑
                 try:
                     current_content = self.get_latest_version()
                     if current_content:
-                        # 判断版本号和下载链接
-                        if self.last_content:
-                            if current_content['版本号'] == self.last_content['版本号']:
-                                if current_content['下载地址'] == self.last_content['下载地址']:
-                                    self.logger.info(f"{self.name}: 成功获取内容，但未发现更新")
-                                    continue
-                                else:
-                                    self.logger.info(f"检测到下载链接变化 - 版本: {current_content['版本号']}")
-                            else:
-                                self.logger.info(f"检测到新版本: {current_content['版本号']}")
-                        
-                        # 保存到数据库并发送通知
-                        self.save_to_database(current_content)
-                        self.send_notification(current_content)
-                        self.last_content = current_content
-                        self.last_hash = self.calculate_hash(current_content)
+                        current_hash = self.calculate_hash(current_content)
+                        if current_hash != self.last_hash:
+                            # 保存到数据库
+                            self.save_to_database(current_content)
+                            self.send_notification(current_content)
+                            self.last_hash = current_hash
+                            self.last_content = current_content
+                        else:
+                            self.logger.info(f"{self.name}: 成功获取内容，但未发现更新")
                     else:
                         error_msg = f"获取数据失败，等待下次重试"
                         self.logger.error(error_msg)
+                        self.send_error_notification(error_msg)
                 except Exception as e:
                     error_msg = f"监控出错: {str(e)}"
                     self.logger.error(error_msg)
+                    self.send_error_notification(error_msg)
                     time.sleep(60)
         
         except KeyboardInterrupt:
             self.logger.info("收到停止信号")
         finally:
             self.logger.info(f"监控器 {self.name} 已停止")
+            self.send_notification("监控服务已停止", is_startup=True)
 
 class HuaweiLoaderMonitor(BaseMonitor):
     """华为加载器监控"""

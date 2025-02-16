@@ -170,5 +170,41 @@ def get_logs(name):
     except Exception as e:
         return str(e)
 
+@app.route('/settings', methods=['GET', 'POST'])
+def settings():
+    """设置页面路由"""
+    try:
+        monitor_running = is_monitor_running()
+        
+        if request.method == 'POST':
+            # 处理检查间隔设置
+            for monitor in Config.CHECK_INTERVALS.keys():
+                interval = request.form.get(f'check_interval_{monitor}')
+                if interval and interval.isdigit():
+                    interval = int(interval)
+                    if 10 <= interval <= 3600:
+                        if interval != Config.CHECK_INTERVALS[monitor]:
+                            if Config.update_interval(monitor, interval):
+                                flash(f'{monitor} 检查间隔已更新为 {interval}秒', 'success')
+                            else:
+                                flash(f'{monitor} 检查间隔更新失败', 'error')
+            
+            return redirect('/settings')
+        
+        # 获取系统状态信息
+        system_status = {
+            'running': '正常运行中' if monitor_running else '已停止',
+            'db_connected': '已连接' if db.is_connected() else '未连接',
+            'last_update': db.get_last_update_time()
+        }
+        
+        return render_template('settings.html',
+                             intervals=Config.CHECK_INTERVALS,
+                             system_status=system_status)
+                             
+    except Exception as e:
+        app.logger.error(f"设置页面错误: {str(e)}")
+        return render_template('error.html', error=str(e))
+
 if __name__ == '__main__':
     app.run(debug=True, port=5001) 
