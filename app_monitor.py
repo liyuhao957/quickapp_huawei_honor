@@ -1065,23 +1065,13 @@ class MonitorManager:
     def _send_startup_heartbeat(self):
         """发送启动通知"""
         try:
-            # 创建监控项目名称映射
-            monitor_names = {
-                'huawei_loader': '华为加载器',
-                'huawei_version': '华为版本更新说明',
-                'honor_debugger': '荣耀调试器',
-                'honor_engine': '荣耀引擎'
-            }
-            
-            # 获取中文名称列表
-            chinese_names = [monitor_names[key] for key in self.monitors.keys()]
-            
+            # 构造启动消息
             message = {
                 "msg_type": "interactive",
                 "card": {
                     "config": {"wide_screen_mode": True},
                     "header": {
-                        "template": "blue",
+                        "template": "green",
                         "title": {"content": "监控服务启动", "tag": "plain_text"}
                     },
                     "elements": [
@@ -1089,14 +1079,14 @@ class MonitorManager:
                             "tag": "markdown",
                             "content": (
                                 "🚀 **服务已成功启动**\n\n"
-                                f"启动时间：`{self._start_time.strftime('%Y-%m-%d %H:%M:%S')}`\n"
-                                f"监控项目：`{'、'.join(chinese_names)}`\n"
-                                f"检查间隔：`{Config.CHECK_INTERVALS['huawei_version']}秒`"
+                                f"启动时间：`{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}`\n"
+                                f"监控项目：`华为版本说明, 荣耀调试器, 荣耀引擎, 华为加载器`"
                             )
                         }
                     ]
                 }
             }
+            
             requests.post(Config.HEARTBEAT_WEBHOOK, json=message, timeout=30)
             print("启动通知发送成功")
         except Exception as e:
