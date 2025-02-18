@@ -968,29 +968,37 @@ class HuaweiLoaderMonitor(BaseMonitor):
             for link in phone_links:
                 text = link.get_text().strip()
                 href = link.get('href')
-                version = None
-                spec = None
                 
+                # 从显示文本中提取版本号
+                display_version = None
+                version_match = re.search(r'V?(\d+\.\d+\.\d+\.\d+)', text)
+                if version_match:
+                    display_version = version_match.group(1)
+                
+                # 从下载链接中提取实际版本号
+                actual_version = None
+                actual_match = re.search(r'loader-(\d+\.\d+\.\d+\.\d+)\.apk', href)
+                if actual_match:
+                    actual_version = actual_match.group(1)
+                
+                # 提取规范版本
+                spec = None
                 parent = link.find_parent('td') or link.parent
                 if parent:
                     row = parent.find_parent('tr')
                     row_text = row.get_text() if row else parent.get_text()
-                    
-                    version_match = re.search(r'V?(\d+\.\d+\.\d+\.\d+)', text)
                     spec_match = re.search(r'支持(\d{4})规范|（支持(\d{4})规范）', row_text)
-                    
-                    if version_match:
-                        version = version_match.group(1)
                     if spec_match:
                         spec = spec_match.group(1) or spec_match.group(2)
-                    
-                    if version and spec:
-                        versions.append({
-                            'text': text,
-                            'url': href,
-                            'version': version,
-                            'spec': spec
-                        })
+                
+                if display_version and spec:
+                    versions.append({
+                        'text': text,
+                        'url': href,
+                        'version': display_version,
+                        'actual_version': actual_version or display_version,
+                        'spec': spec
+                    })
             
             if versions:
                 # 按版本号排序
@@ -999,7 +1007,7 @@ class HuaweiLoaderMonitor(BaseMonitor):
             
             raise ValueError("未找到有效的版本信息")
         except Exception as e:
-            print(f"解析内容失败: {str(e)}")
+            self.logger.error(f"解析内容失败: {str(e)}")
             return None
 
     def get_latest_version(self):
@@ -1016,6 +1024,11 @@ class HuaweiLoaderMonitor(BaseMonitor):
         prefix = "🔔 监控服务已启动" if is_startup else "🚨 检测到加载器更新！"
         release_time = self.parse_time_from_url(content.get('url', '')) or '未知'
         
+        # 添加版本差异提示
+        version_info = f"|  版本号  | `{content['version']}` |"
+        if content.get('actual_version') and content['actual_version'] != content['version']:
+            version_info += f"\n⚠️ **注意**: 实际下载版本为 `{content['actual_version']}`"
+        
         return {
             "msg_type": "interactive",
             "card": {
@@ -1031,7 +1044,7 @@ class HuaweiLoaderMonitor(BaseMonitor):
                             f"{prefix}\n\n"
                             "|  类型  |  内容  |\n"
                             "|:------:|:------|\n"
-                            f"|  版本号  | `{content['version']}` |\n"
+                            f"{version_info}\n"
                             f"|  规范版本  | `{content['spec']}` |\n"
                             f"|  发布时间  | `{release_time}` |\n"
                             f"|  下载地址  | [点击下载]({content.get('url', '暂无')}) |"

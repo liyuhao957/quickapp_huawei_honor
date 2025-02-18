@@ -72,13 +72,13 @@ class VersionDatabase:
                 cursor.execute('''
                     CREATE TABLE IF NOT EXISTS huawei_loader_versions (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        version TEXT NOT NULL,         -- 版本号
+                        version TEXT NOT NULL,         -- 页面显示的版本号
+                        actual_version TEXT,           -- 新增：实际下载文件的版本号
                         spec TEXT NOT NULL,            -- 规范版本
                         file_name TEXT NOT NULL,       -- 文件名
                         download_url TEXT NOT NULL,    -- 下载地址
-                        release_time TEXT,             -- 新增：发布时间
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        UNIQUE(version)
+                        release_time TEXT,             -- 发布时间
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )
                 ''')
                 
@@ -244,7 +244,7 @@ class VersionDatabase:
 
     def save_huawei_loader(self, loader_data: Dict) -> bool:
         """保存华为加载器信息"""
-        required_fields = ['version', 'spec', 'text', 'url']
+        required_fields = ['version', 'actual_version', 'spec', 'text', 'url']
         try:
             if not self._validate_data(loader_data, required_fields):
                 raise ValueError("缺少必要字段")
@@ -263,20 +263,33 @@ class VersionDatabase:
             conn = self._get_connection()
             cursor = conn.cursor()
             try:
+                # 检查是否已存在相同版本
                 cursor.execute('''
-                    INSERT OR REPLACE INTO huawei_loader_versions 
-                    (version, spec, file_name, download_url, release_time) 
-                    VALUES (?, ?, ?, ?, ?)
-                ''', (
-                    loader_data['version'],
-                    loader_data['spec'],
-                    loader_data['text'],
-                    loader_data['url'],
-                    release_time
-                ))
-                conn.commit()
-                self.logger.info(f"保存华为加载器信息成功: {loader_data['version']}")
-                return True
+                    SELECT id FROM huawei_loader_versions 
+                    WHERE version = ? AND actual_version = ?
+                ''', (loader_data['version'], loader_data['actual_version']))
+                
+                if not cursor.fetchone():
+                    # 只有当完全相同的记录不存在时才插入
+                    cursor.execute('''
+                        INSERT INTO huawei_loader_versions 
+                        (version, actual_version, spec, file_name, download_url, release_time) 
+                        VALUES (?, ?, ?, ?, ?, ?)
+                    ''', (
+                        loader_data['version'],
+                        loader_data['actual_version'],
+                        loader_data['spec'],
+                        loader_data['text'],
+                        loader_data['url'],
+                        release_time
+                    ))
+                    conn.commit()
+                    self.logger.info(f"保存华为加载器信息成功: {loader_data['version']} (实际版本: {loader_data['actual_version']})")
+                    return True
+                else:
+                    self.logger.info(f"版本已存在，跳过保存: {loader_data['version']} (实际版本: {loader_data['actual_version']})")
+                    return True
+                
             except Exception:
                 conn.rollback()
                 raise
