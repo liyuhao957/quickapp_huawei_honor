@@ -1027,7 +1027,9 @@ class HuaweiLoaderMonitor(BaseMonitor):
         # 添加版本差异提示
         version_info = f"|  版本号  | `{content['version']}` |"
         if content.get('actual_version') and content['actual_version'] != content['version']:
-            version_info += f"\n⚠️ **注意**: 实际下载版本为 `{content['actual_version']}`"
+            version_info += f"\n⚠️ **注意**: 实际下载版本仍为 `{content['actual_version']}`"
+        elif content.get('actual_version') and content['actual_version'] == content['version']:
+            version_info += f"\n⚠️ **注意**: 页面版本已更新，但下载文件未更新"
         
         return {
             "msg_type": "interactive",
