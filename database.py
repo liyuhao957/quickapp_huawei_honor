@@ -354,7 +354,7 @@ class VersionDatabase:
                 }
             
             # 华为加载器 - 使用 release_time
-            cursor.execute('SELECT version, spec, file_name, download_url, release_time FROM huawei_loader_versions')
+            cursor.execute('SELECT version, actual_version, spec, file_name, download_url, release_time FROM huawei_loader_versions')
             rows = cursor.fetchall()
             if rows:
                 sorted_rows = sorted(rows,
@@ -363,9 +363,10 @@ class VersionDatabase:
                 latest_versions['huawei_loader'] = {
                     'name': '华为加载器',
                     'version': sorted_rows[0][0],
-                    'date': sorted_rows[0][4],  # release_time
+                    'actual_version': sorted_rows[0][1],  # 添加 actual_version
+                    'date': sorted_rows[0][5],  # release_time
                     'updates': {
-                        'features': [f'规范版本: {sorted_rows[0][1]}', f'文件: {sorted_rows[0][2]}']
+                        'features': [f'规范版本: {sorted_rows[0][2]}', f'文件: {sorted_rows[0][3]}']
                     }
                 }
             
@@ -383,7 +384,7 @@ class VersionDatabase:
             
             if monitor_type == 'huawei_loader':
                 cursor.execute('''
-                    SELECT version, spec, file_name, download_url, release_time, created_at 
+                    SELECT version, actual_version, spec, file_name, download_url, release_time, created_at 
                     FROM huawei_loader_versions
                 ''')
                 rows = cursor.fetchall()
@@ -392,11 +393,12 @@ class VersionDatabase:
                                    reverse=True)
                 return [{
                     'version': row[0],
-                    'spec': row[1],
-                    'text': row[2],
-                    'url': row[3],
-                    'release_time': row[4],
-                    'created_at': row[5]
+                    'actual_version': row[1],
+                    'spec': row[2],
+                    'text': row[3],
+                    'url': row[4],
+                    'release_time': row[5],
+                    'created_at': row[6]
                 } for row in sorted_rows]
             
             elif monitor_type == 'honor_debugger':

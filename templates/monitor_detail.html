@@ -201,7 +201,12 @@
                                         </div>
                                         <div class="bg-gradient-to-br from-gray-50 to-gray-100/50 rounded-lg p-4 shadow-sm">
                                             <div class="text-sm text-gray-500 mb-1">文件</div>
-                                            <div class="font-medium text-gray-900">{{ item.text }}</div>
+                                            <div class="font-medium text-gray-900">
+                                                {{ item.text }}
+                                                {% if item.actual_version and item.actual_version != item.version %}
+                                                    <span class="text-amber-500 text-sm ml-2">(实际版本: {{ item.actual_version }})</span>
+                                                {% endif %}
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="flex justify-end">
